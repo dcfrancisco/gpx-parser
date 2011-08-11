@@ -58,19 +58,40 @@ public class CargadorGpx implements Variables_Globales{
 		procesarGPX(doc);
 	}
 	
-	private int getCadencia(List listaExtensiones){
-		// Extrae el dato, comprueba su validez y,
-		// en caso de error, devuelve un 0
+	private int getCadencia(List trackPointExtensionList){
+		/*
+		 * Varios niveles. Empezamos desde el del parametro
+		 * <extensions>	-> trackPointExtensionList
+		 * 		<gpxtpx:TrackPointExtension> -> listaExtensiones
+		 * 			<gpxtpx:hr>
+		 * 			<gpxtpx:cad>
+		 * 
+		 * Osea, basicamente recogemos la lista del parametro
+		 * para buscar otra lista dentro que contiene la lista
+		 * de extensiones donde encontrar la cadencia
+		 */
 		Element posibleCad;
-		int cad = 0;
-		for(int i=0; i<listaExtensiones.size(); i++){
-			posibleCad = (Element)listaExtensiones.get(i);
-			if(posibleCad.getName().equals("cad")){
-				cad = Integer.parseInt(posibleCad.getValue());
-				return cad;
+		List listaExtensiones = null;
+		Element trackPointExtension;
+		for(int i = 0; i<trackPointExtensionList.size(); i++){
+			trackPointExtension = ((Element)trackPointExtensionList.get(i));
+			if(trackPointExtension.getName().equals("TrackPointExtension")){
+				listaExtensiones = trackPointExtension.getChildren();
 			}
 		}
-		return cad;
+		if (listaExtensiones!=null) {
+			int cad = 0;
+			for (int i = 0; i < listaExtensiones.size(); i++) {
+				posibleCad = (Element) listaExtensiones.get(i);
+				if (posibleCad.getName().equals("cad")) {
+					cad = Integer.parseInt(posibleCad.getValue());
+					return cad;
+				}
+			}
+			return cad;
+		} else {
+			return 0;
+		}
 	}
 	
 	private String getDesc(List trkNodeList){
@@ -129,18 +150,40 @@ public class CargadorGpx implements Variables_Globales{
 		return posibleExtension;
 	}
 	
-	private int getFrecuencia(List trkptExtensions){
-		// TODO Extrae el dato, comprueba su validez y,
-		// en caso de error, devuelve un 0
-		Element posibleFrec;
-		int hr = 0;
-		for(int j=0; j<trkptExtensions.size(); j++){
-			posibleFrec = (Element)trkptExtensions.get(j);
-			if(posibleFrec.getName().equals("hr")){
-				hr = Integer.parseInt(posibleFrec.getValue());
+	private int getFrecuencia(List trackPointExtensionList){
+		/*
+		 * Varios niveles. Empezamos desde el del parametro
+		 * <extensions>	-> trackPointExtensionList
+		 * 		<gpxtpx:TrackPointExtension> -> listaExtensiones
+		 * 			<gpxtpx:hr>
+		 * 			<gpxtpx:cad>
+		 * 
+		 * Osea, basicamente recogemos la lista del parametro
+		 * para buscar otra lista dentro que contiene la lista
+		 * de extensiones donde encontrar la cadencia
+		 */
+		Element posibleHr;
+		List listaExtensiones = null;
+		Element trackPointExtension;
+		for(int i = 0; i<trackPointExtensionList.size(); i++){
+			trackPointExtension = ((Element)trackPointExtensionList.get(i));
+			if(trackPointExtension.getName().equals("TrackPointExtension")){
+				listaExtensiones = trackPointExtension.getChildren();
 			}
 		}
-		return hr;
+		if (listaExtensiones!=null) {
+			int hr = 0;
+			for (int i = 0; i < listaExtensiones.size(); i++) {
+				posibleHr = (Element) listaExtensiones.get(i);
+				if (posibleHr.getName().equals("hr")) {
+					hr = Integer.parseInt(posibleHr.getValue());
+					return hr;
+				}
+			}
+			return hr;
+		} else {
+			return 0;
+		}
 	}
 	
 	private Date getHora(Element trkpt){
@@ -316,9 +359,10 @@ public class CargadorGpx implements Variables_Globales{
 	 * @return
 	 */
 	private TrackSegment parseTrackSegment(Element trkseg){
-		TrackSegment trackSegment = new TrackSegment();
+		TrackSegment ts = new TrackSegment();
 		List trackPointList = trkseg.getChildren();
 		Iterator trkptIter = trackPointList.iterator();
+		GpxProcessor gp = new GpxProcessor();
 		if (trkptIter.hasNext()) {
 			while (trkptIter.hasNext()) {
 				Element trkpt = (Element) trkptIter.next();
@@ -345,14 +389,32 @@ public class CargadorGpx implements Variables_Globales{
 
 				int cad = getCadencia(extension.getChildren());
 				pt.setCad(cad);
-				trackSegment.add(pt);
+				ts.add(pt);
 
 				//ESCRIBIR EN CADA PUNTO LA DISTANCIA QUE SE LLEVA RECORRIDA RESPECTO AL TOTAL
-				GpxProcessor gp = new GpxProcessor();
-				trackSegment = gp.getDistance(trackSegment);
+				ts = gp.getDistance(ts);
 			}
 		}
-		return trackSegment;
+		
+		//Escribir todos los valores en el objeto trackSegment
+		ts.alturaMaxima = gp.getMaximumHeight(ts);
+		ts.alturaMinima = gp.getMinimumHeight(ts);
+		ts.ascensionTotal = gp.getTotalAscent(ts);
+		ts.cadenciaMaxima = gp.getMaxCadence(ts);
+		ts.cadMedia = gp.getAverageCadence(ts);
+		ts.descensoTotal = gp.getTotalDescent(ts);
+		ts.distancia = gp.getTotalDistance(ts);
+		ts.frecMaxima = gp.getMaxHR(ts);
+		ts.frecMedia = gp.getAverageHR(ts);
+		ts.porcNegativoMedio = gp.getAverageNegativePercent(ts);
+		ts.porcPositivoMedio = gp.getAveragePositivePercent(ts);
+		ts.potenciaMaxima = gp.getMaxPower(ts);
+		ts.potenciaMedia = gp.getAveragePower(ts);
+		ts.rampaNegativaMaxima = gp.getMaxNegativePercent(ts);
+		ts.rampaPositivaMaxima = gp.getMaxPositivePercent(ts);
+		ts.tiempo = gp.getTime(ts);
+		
+		return ts;
 	}
 	
 	/**
@@ -376,8 +438,8 @@ public class CargadorGpx implements Variables_Globales{
 			// Cada trk tiene 2 nodos que contienen el nombre del track y su descripcion, luego, tiene el resto de nodos 
 			// tipo tracksegment
 			List trkNodeList = trk.getChildren();
-			track.setName(getName(trkNodeList));
-			track.setDesc(getDesc(trkNodeList));
+			track.name = getName(trkNodeList);
+			track.desc = getDesc(trkNodeList);
 			
 			Element nodoTrk;
 			for(int j=0; j<trkNodeList.size(); j++){
