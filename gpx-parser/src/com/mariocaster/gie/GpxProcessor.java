@@ -65,9 +65,7 @@ public class GpxProcessor implements ProcessorInterface{
 		
 		//float resultado = (float) ((diferencia/(distancia*1000))*100);
 		resultado = (float)Math.round(resultado*100)/100;
-		
-		//System.out.println("Diferencia = " + diferencia + ", Ascension = " + ascension + ", inicio " + inicio + ", Resultado = " + resultado);
-		System.out.println("Resultado = " + resultado);
+
 		return resultado;
 	}
 
@@ -118,56 +116,8 @@ public class GpxProcessor implements ProcessorInterface{
 	@Override
 	public double getDistanceByTime(TrackSegment ts, int seconds){
 		//TODO Devuelve la distancia recorrida en un determinado numero de segundos
-		int pointNumber = ts.size();
-		
-		//Usar solo este metodo si el numero es menor que un millon
-		if(pointNumber<1000000){
-			long time = seconds*1000;
-
-			Calendar tiempoInicio = Calendar.getInstance();
-			Calendar intervalo = Calendar.getInstance();
-			double maxDistance = 0;
-			for(int iter = 0; iter<pointNumber; iter++){
-
-				tiempoInicio.setTimeInMillis(ts.get(iter).getTiempo());
-				intervalo.setTimeInMillis(tiempoInicio.getTimeInMillis()+time);
-				
-				/* Busqueda binaria del tiempo transcurrido
-				 * La condicion de salida sera que el tiempo intervalo sea
-				 * similar al tiempo del punto
-				 */
-				TrackPoint p;
-				int indice = 0;
-				long tiempoPunto = 0;
-				long tiempoIntervalo = 0;
-				TrackSegment nuevoTs = new TrackSegment();
-				for(int i = iter; i<pointNumber; i++){
-					p = ts.get(i);
-					tiempoPunto = p.getTiempo();
-					tiempoIntervalo = intervalo.getTimeInMillis();
-					if(tiempoPunto>tiempoIntervalo){
-						break;
-					}
-					nuevoTs.add(p);
-				}
-				
-				if(nuevoTs.size() == 0){
-					//Error
-					System.out.println("Se ha producido un error");
-					//return 0;
-				}
-				
-				double distanciaActual = getTotalDistance(nuevoTs);
-				if (distanciaActual>maxDistance){
-					maxDistance = distanciaActual;
-				}			
-			}
-			return maxDistance;
-		} else {
-			System.out.println("Fichero demasiado grande");
-			return 0;
-		}
-	}
+		return 0;
+	}	
 
 	@Override
 	/**
@@ -192,13 +142,13 @@ public class GpxProcessor implements ProcessorInterface{
 
 	@Override
 	public double getMaxAscentByDistance(TrackSegment ts, float distance) {
-		// TODO Auto-generated method stub
+		// TODO Calcular la mayor ascension maxima conseguida en la distancia pasada
 		return 0;
 	}
 	
 	@Override
 	public double getMaxAscentByTime(TrackSegment ts, int seconds) {
-		// TODO Auto-generated method stub
+		// TODO Calcular la mayor ascension conseguida en el tiempo pasado
 		return 0;
 	}
 
@@ -249,7 +199,7 @@ public class GpxProcessor implements ProcessorInterface{
 		double max = 0;
 		
 		for(TrackPoint p: ts){
-			if(p.getCad()>max){
+			if(p.getEle()>max){
 				max = p.getEle();
 			}
 		}
@@ -353,6 +303,7 @@ public class GpxProcessor implements ProcessorInterface{
 	 * @return
 	 */
 	public Track getTrackSplitted(TrackSegment ts, float meters){
+		//TODO comprobar la validez del corte
 		int numPuntos = ts.size();
 		float distancia = 0;
 		TrackSegment tsTemp = new TrackSegment();
