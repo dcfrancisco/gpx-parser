@@ -425,7 +425,7 @@ public class CargadorGpx implements Variables_Globales{
 		if (gpx!=null) {
 			this.gpx = gpx;
 			track = new Track();
-			//trackSegment = new TrackSegment();
+
 			raiz = gpx.getRootElement(); //gpx
 			List elementosDeRaiz = raiz.getChildren();
 			

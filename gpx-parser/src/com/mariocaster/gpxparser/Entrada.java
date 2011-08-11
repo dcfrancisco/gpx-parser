@@ -33,6 +33,7 @@ public class Entrada {
 		for (int i = 0; i<trk.size(); i++){
 			System.out.println("*************** TrackSegment " + i);
 			trkSeg = trk.get(i);
+			/*
 			System.out.println("getAverageCadence = " + gpxP.getAverageCadence(trkSeg));
 			System.out.println("getAverageHR = " + gpxP.getAverageHR(trkSeg));
 			System.out.println("getAverageNegativePercent = " + gpxP.getAverageNegativePercent(trkSeg));
@@ -55,6 +56,23 @@ public class Entrada {
 			System.out.println("getTimeByDistance = " + gpxP.getTimeByDistance(trkSeg, 10));
 			System.out.println("getTrackSplitted = " + gpxP.getTrackSplitted(trkSeg, 1));
 			System.out.println("");
+			*/
+			
+			System.out.println("Altura maxima = " + trkSeg.alturaMaxima);
+			System.out.println("alturaMinima = " + trkSeg.alturaMinima);
+			System.out.println("ascensionTotal = " + trkSeg.ascensionTotal);
+			System.out.println("cadenciaMaxima = " + trkSeg.cadenciaMaxima);
+			System.out.println("cadMedia = " + trkSeg.cadMedia);
+			System.out.println("descensoTotal = " + trkSeg.descensoTotal);
+			System.out.println("distancia = " + trkSeg.distancia);
+			System.out.println("frecMaxima = " + trkSeg.frecMaxima);
+			System.out.println("frecMedia = " + trkSeg.frecMedia);
+			System.out.println("porcNegativoMedio = " + trkSeg.porcNegativoMedio);
+			System.out.println("porcPositivoMedio = " + trkSeg.porcPositivoMedio);
+			System.out.println("potenciaMaxima = " + trkSeg.potenciaMaxima);
+			System.out.println("rampaNegativaMaxima = " + trkSeg.rampaNegativaMaxima);
+			System.out.println("rampaPositivaMaxima = " + trkSeg.rampaPositivaMaxima);
+			System.out.println("tiempo = " + trkSeg.tiempo.getTime());
 		}
 		
 		/*
